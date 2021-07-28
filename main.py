@@ -22,7 +22,7 @@ mp_pose = mp.solutions.pose
 average_frame_count = 10
 
 for i in range(13, 14):
-    cap = cv2.VideoCapture('./mediapipe_videos/shot_' + str(i) + '.mp4')
+    cap = cv2.VideoCapture('./mediapipe_videos/videos/shot_' + str(i) + '.mp4')
     out = cv2.VideoWriter('./mediapipe_videos/pose_estimate/shot_pose_' + str(i) + '.avi', cv2.VideoWriter_fourcc(*'XVID'), 30, (640, 360))
 
     ax = plt.axes(projection='3d')  # 用這個繪圖物件建立一個Axes物件(有3D座標)
