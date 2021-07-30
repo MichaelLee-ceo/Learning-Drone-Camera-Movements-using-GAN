@@ -1,19 +1,30 @@
 import torch
 import os
+import math
+import numpy as np
 
-data_path = './mediapipe_videos/coordinates_camera_pos/'
-fullpath = os.path.join(os.getcwd() + data_path)
+def read_coordinates():
+    data_path = './mediapipe_videos/coordinates_camera_pos/'
+    fullpath = os.path.join(os.getcwd() + data_path)
 
-data = []
-for root, dirs, files in os.walk(fullpath):
-    for idx, f in enumerate(files):
-        if f.endswith('.pt'):
-            data.append(torch.load(fullpath + f))
+    data = []
+    data_length = []
+    for root, dirs, files in os.walk(fullpath):
+        for idx, f in enumerate(files):
+            if f.endswith('.pt'):
+                data.append(torch.load(fullpath + f))
+                data_length.append(data[-1].shape[0])
 
-print(len(data))
-minimun_coordinates = 0
-for t in data:
-    minimun_coordinates = min(len(t), minimun_coordinates)
-    print(len(t), t.shape)
+    print('Found data files:', len(data))
 
-print(minimun_coordinates)
+    # calculate mean coordinates from each video
+    mean_data_count = math.floor(np.mean(data_length))
+    print('Mean data points:', mean_data_count)
+
+    # amending data to match mean coordinates
+    for i in range(len(data)):
+        for j in range(data[i].shape[0], mean_data_count):
+            data[i] = torch.cat((data[i], torch.unsqueeze(data[i][-1], 0)), 0)
+        data[i] = data[i][:mean_data_count]
+
+    return data
