@@ -8,6 +8,7 @@ from approximate_focal_length import get_focal_length
 import matplotlib
 import torch
 import csv
+import os
 
 class Position():
     def __init__(self, x = 0, y = 0, z = 0):
@@ -15,15 +16,21 @@ class Position():
         self.y = y
         self.z = z
 
+video_path = './mediapipe_videos/videos/'
+write_path = './mediapipe_videos/pose_estimate/'
+
+files = len([name for name in os.listdir(video_path) if os.path.isfile(video_path + name)])
+print('Find files:', files)
+# files = 2
 
 mp_drawing = mp.solutions.drawing_utils
 mp_pose = mp.solutions.pose
 
 average_frame_count = 10
 
-for i in range(13, 14):
-    cap = cv2.VideoCapture('./mediapipe_videos/videos/shot_' + str(i) + '.mp4')
-    out = cv2.VideoWriter('./mediapipe_videos/pose_estimate/shot_pose_' + str(i) + '.avi', cv2.VideoWriter_fourcc(*'XVID'), 30, (640, 360))
+for i in range(1, files + 1):
+    cap = cv2.VideoCapture(video_path + 'shot_' + str(i) + '.mp4')
+    out = cv2.VideoWriter(write_path + 'shot_pose_' + str(i) + '.avi', cv2.VideoWriter_fourcc(*'XVID'), 30, (640, 360))
 
     ax = plt.axes(projection='3d')  # 用這個繪圖物件建立一個Axes物件(有3D座標)
     ax.set_xlabel('x label')
@@ -44,20 +51,24 @@ for i in range(13, 14):
 
     frame = 0
     with mp_pose.Pose(static_image_mode=False, min_detection_confidence=0.5, min_tracking_confidence=0.5, model_complexity=2) as pose:
+        print('\n### File: ' + str(i) + ' ###')
         while cap.isOpened():
             success, image = cap.read()
 
             if not success:
                 print("Correctness:", correct/frame)
-                torch.save(torch.Tensor(object_positions), './mediapipe_videos/coordinates_object_pos/shot_' + str(i) + '.pt')
-                torch.save(torch.Tensor(camera_positions), './mediapipe_videos/coordinates_camera_pos/shot_' + str(i) + '.pt')
-                print("Ignoring empty camera frame.")
-                plt.show()
+                torch_camera_positions = torch.Tensor(camera_positions)
+                # torch.save(torch.Tensor(object_positions), './mediapipe_videos/coordinates_object_pos/shot_' + str(i) + '.pt')
+                torch.save(torch_camera_positions, './mediapipe_videos/coordinates_camera_pos/shot_' + str(i) + '.pt')
+                # print("Ignoring empty camera frame.")
+                print(torch_camera_positions, torch_camera_positions.shape)
+                plt.savefig('./mediapipe_videos/coordinates_camera_pos/shot_' + str(i) + '.png')
+                # plt.show()
 
-                with open('./mediapipe_videos/csv_object_pos/shot_' + str(i) + '.csv', 'w') as f:
-                    writer = csv.writer(f)
-                    writer.writerow(['X', 'Y', 'Z'])
-                    writer.writerows(object_positions)
+                # with open('./mediapipe_videos/csv_object_pos/shot_' + str(i) + '.csv', 'w') as f:
+                #     writer = csv.writer(f)
+                #     writer.writerow(['X', 'Y', 'Z'])
+                #     writer.writerows(object_positions)
                 with open('./mediapipe_videos/csv_camera_pos/shot_' + str(i) + '.csv', 'w') as f:
                     writer = csv.writer(f)
                     writer.writerow(['X', 'Y', 'Z'])
@@ -68,10 +79,9 @@ for i in range(13, 14):
             # Flip the image horizontally for a later selfie-view display, and convert
             # the BGR image to RGB.
             # image = cv2.cvtColor(cv2.flip(image, 1), cv2.COLOR_BGR2RGB)
-            # image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
 
             # image = cv2.boxFilter(image, -1, (3, 3), normalize=1)
-            image = cv2.pyrMeanShiftFiltering(image, 10, 20,)  # 濾波
+            # image = cv2.pyrMeanShiftFiltering(image, 10, 10,)  # 濾波
 
             # kernel = np.ones((3, 3), np.float32) / 25
             # image = cv2.filter2D(image, -1, kernel)
@@ -150,20 +160,20 @@ for i in range(13, 14):
                 # 求 camera 座標
                 camera_pos = np.dot(-np.linalg.inv(R), T)
                 camera_position = Position(camera_pos[0].item(), camera_pos[1].item(), camera_pos[2].item())
-                camera_positions.append([camera_position.x, camera_position.y, camera_position.z])
+                # camera_positions.append([camera_position.x, camera_position.y, camera_position.z])
                 # print('Camera 3D:', camera_position.x, camera_position.y, camera_position.z)
-
 
                 camera_x.append(camera_position.x)
                 camera_y.append(camera_position.y)
                 camera_z.append(camera_position.z)
+
                 if frame % average_frame_count == 0:
                     frame_idx = int(frame/average_frame_count)
-                    # print(frame_idx, frame_idx + average_frame_count)
                     average_camera_pos.x = sum(list(camera_x[frame_idx : (frame_idx + average_frame_count)])) / average_frame_count
                     average_camera_pos.y = sum(list(camera_y[frame_idx : (frame_idx + average_frame_count)])) / average_frame_count
                     average_camera_pos.z = sum(list(camera_z[frame_idx : (frame_idx + average_frame_count)])) / average_frame_count
-                    print('\nAverage position', average_camera_pos.x, average_camera_pos.y, average_camera_pos.z)
+                    camera_positions.append([average_camera_pos.x, average_camera_pos.y, average_camera_pos.z])
+                    print('Average position', average_camera_pos.x, average_camera_pos.y, average_camera_pos.z)
 
                 # nose 在 3D(world space) 的位置
                 n3d_1 = np.array([[nose_3d.x * image_width],
@@ -207,10 +217,8 @@ for i in range(13, 14):
                 # 過濾
                 # if first and (abs(nose_end_point2D[0][0][0] - nose_2d.x * image_width) <= 5 or abs(nose_end_point2D[0][0][1] - nose_2d.y * image_height) <= 5):
                 if first and (abs(camera_coordinates[0] - image_width / 2) < 10) and (abs(camera_coordinates[1] - image_height / 2) < 10):
-                    previous_3d_camera = [camera_coordinates[0], camera_coordinates[1]]
-                    previous_2d_nose = [nose_coordinates[0], nose_coordinates[1]]
+                    previous_3d_camera = Position(camera_position.x, camera_position.y, camera_position.z)
                     first = False
-
 
                 # Draw the pose annotation on the image.
                 # image.flags.writeable = True
@@ -229,27 +237,25 @@ for i in range(13, 14):
 
                 # if abs(nose_end_point2D[0][0][0] - nose_2d.x * image_width) > 15 or abs(nose_end_point2D[0][0][1] - nose_2d.y * image_height) > 15:
                 if (abs(int(camera_end_point2D[0][0][0]) - image_width / 2) > 10) and (abs(int(camera_end_point2D[0][0][1]) - image_height / 2) > 10):
-                    # camera_coordinates = previous_3d_camera
-                    # image_coordinates = previous_2d_nose
-                    print('# Refine #')
+                    camera_x[-1] = previous_3d_camera.x
+                    camera_y[-1] = previous_3d_camera.y
+                    camera_z[-1] = previous_3d_camera.z
+                    # print('# Refine #')
                 else:
-                    ax.scatter3D(average_camera_pos.x, abs(average_camera_pos.z), average_camera_pos.y, color='Orange')
+                    ax.scatter3D(average_camera_pos.x, average_camera_pos.z, average_camera_pos.y, color='Orange')
                     ax.scatter3D(0, 0, 0, color='Blue')
                     plt.draw()
                     plt.pause(0.001)
                     correct += 1
 
-                # previous_2d_nose = image_coordinates
-                # previous_3d_camera = camera_coordinates
+                previous_3d_camera = camera_position
 
             except Exception as e:
                 print(e)
                 pass
 
-            # cv2.imshow('MediaPipe Pose', image)
             # Write the output video
             out.write(image.astype('uint8'))
-
             # if cv2.waitKey(5) & 0xFF == 27:
             #     break
             frame += 1

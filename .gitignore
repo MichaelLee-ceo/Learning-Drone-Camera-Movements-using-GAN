@@ -1,0 +1,13 @@
+# ignore written videos
+*.avi
+
+# ignore input videos
+*.mp4
+
+# ignore zip files
+*.rar
+
+# ignore coordinates files
+*.pt
+*.csv
+*.png
