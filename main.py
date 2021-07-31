@@ -7,6 +7,7 @@ Generator = train_gan()
 latent_space_samples = torch.randn(1, 50)
 generated_samples = Generator(latent_space_samples)
 generated_samples = generated_samples.view(generated_samples.shape[1], generated_samples.shape[2])
+print(generated_samples)
 
 x = generated_samples[:, 0].detach().numpy()
 y = generated_samples[:, 1].detach().numpy()

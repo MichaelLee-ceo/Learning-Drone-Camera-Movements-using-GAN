@@ -67,7 +67,7 @@ def train_gan():
 
             # Show training loss
             if epoch % 10 == 0 and idx == batch_size - 1:
-                print(f"Epoch: {epoch}, Loss D.: {loss_discriminator}")
+                print(f"\nEpoch: {epoch}, Loss D.: {loss_discriminator}")
                 print(f"Epoch: {epoch}, Loss G.: {loss_generator}")
 
     return generator
