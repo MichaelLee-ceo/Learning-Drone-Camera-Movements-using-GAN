@@ -15,11 +15,11 @@ def read_coordinates():
                 data.append(torch.load(fullpath + f))
                 data_length.append(data[-1].shape[0])
 
-    print('Found data files:', len(data))
+    # print('Found data files:', len(data))
 
     # calculate mean coordinates from each video
     mean_data_count = math.floor(np.mean(data_length))
-    print('Mean data points:', mean_data_count)
+    # print('Mean data points:', mean_data_count)
 
     # amending data to match mean coordinates
     for i in range(len(data)):
@@ -27,4 +27,9 @@ def read_coordinates():
             data[i] = torch.cat((data[i], torch.unsqueeze(data[i][-1], 0)), 0)
         data[i] = data[i][:mean_data_count]
 
-    return data
+    # reverse trajectories
+    prev_data = data
+    data.reverse()
+    prev_data += data
+
+    return torch.stack(prev_data)
