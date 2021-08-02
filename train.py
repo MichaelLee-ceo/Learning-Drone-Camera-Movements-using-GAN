@@ -3,6 +3,10 @@ from model import Discriminator, Generator
 import torch
 
 train_data = read_coordinates()
+max_value = torch.max(train_data)
+
+print('Normalize by(max tensor value):', max_value)
+train_data /= max_value
 
 # fixed random generator seed
 torch.manual_seed(10)
@@ -24,8 +28,8 @@ generator = Generator(50, train_data_pos).to(device=device)
 
 # hyperparameters
 lr = 0.001
-epochs = 300
-batch_size = 8
+epochs = 5000
+batch_size = 2
 loss_function = torch.nn.BCELoss()
 
 optimizer_discriminator = torch.optim.Adam(discriminator.parameters(), lr=lr)
@@ -69,5 +73,6 @@ def train_gan():
             if epoch % 10 == 0 and idx == batch_size - 1:
                 print(f"\nEpoch: {epoch}, Loss D.: {loss_discriminator}")
                 print(f"Epoch: {epoch}, Loss G.: {loss_generator}")
+        torch.save(Generator.model, 'model.h5')
 
     return generator

@@ -6,13 +6,13 @@ class Discriminator(nn.Module):
         self.input_dim = input_dim
         self.model = nn.Sequential(
             nn.Linear(input_dim * 3, 256),
-            nn.ReLU(),
-            # nn.Dropout(0.3),
+            nn.LeakyReLU(),
+            nn.Dropout(0.25),
             nn.Linear(256, 128),
-            nn.ReLU(),
-            # nn.Dropout(0.3),
+            nn.LeakyReLU(),
+            nn.Dropout(0.25),
             nn.Linear(128, 64),
-            nn.ReLU(),
+            nn.LeakyReLU(),
             # nn.Dropout(0.3),
             nn.Linear(64, 1),
             nn.Sigmoid(),
