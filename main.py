@@ -1,11 +1,13 @@
 import torch
-from train import train_gan
 import matplotlib.pyplot as plt
 from mpl_toolkits.mplot3d import Axes3D
+from model import Generator
 
-Generator = train_gan()
-latent_space_samples = torch.randn(1, 50)
-generated_samples = Generator(latent_space_samples)
+generator = Generator(10, 45)
+generator.model = torch.load('model.h5')
+
+latent_space_samples = torch.randn(1, 10).cuda()
+generated_samples = generator(latent_space_samples).cpu()
 generated_samples = generated_samples.view(generated_samples.shape[1], generated_samples.shape[2])
 print(generated_samples)
 
