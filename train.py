@@ -35,7 +35,7 @@ generator = Generator(10, train_data_pos).to(device=device)
 
 # hyperparameters
 lr = 0.001
-epochs = 5000
+epochs = 15000
 batch_size = 1
 loss_function = torch.nn.BCELoss()
 
@@ -46,6 +46,7 @@ train_loader = torch.utils.data.DataLoader(train_set, batch_size=batch_size, shu
 
 
 for epoch in range(epochs):
+    # print(epoch)
     for idx, (real_samples, _) in enumerate(train_loader):
         # Data for training the discriminator
         real_samples = real_samples.to(device=device)
@@ -77,7 +78,7 @@ for epoch in range(epochs):
         optimizer_generator.step()
 
         # Show training loss
-        if epoch % 10 == 0 and idx == batch_size - 1:
+        if epoch % 10 == 0 and idx == len(train_loader) - 1:
             print(f"\nEpoch: {epoch}, Loss D.: {loss_discriminator}")
             print(f"Epoch: {epoch}, Loss G.: {loss_generator}")
 
@@ -86,6 +87,6 @@ for epoch in range(epochs):
             # print(output_generator[0, :5])
             # print(train_data[0, :5])
 
-    torch.save(generator.model, 'model.h5')
+torch.save(generator.model, 'model.h5')
 writer.flush()
 writer.close()

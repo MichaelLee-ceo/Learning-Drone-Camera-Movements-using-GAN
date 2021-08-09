@@ -56,9 +56,9 @@ for i in range(1, files + 1):
                 print("Correctness:", correct/frame)
                 torch_camera_positions = torch.Tensor(camera_positions)
                 # torch.save(torch.Tensor(object_positions), './mediapipe_videos/coordinates_object_pos/shot_' + str(i) + '.pt')
-                torch.save(torch_camera_positions, './mediapipe_videos/coordinates_camera_pos/shot_' + str(i) + '.pt')
+                torch.save(torch_camera_positions[1:], './mediapipe_videos/coordinates_camera_pos/shot_' + str(i) + '.pt')
                 # print("Ignoring empty camera frame.")
-                print(torch_camera_positions, torch_camera_positions.shape)
+                print(torch_camera_positions, torch_camera_positions.shape, torch_camera_positions[1:].shape)
                 plt.savefig('./mediapipe_videos/coordinates_camera_pos/shot_' + str(i) + '.png')
                 # plt.show()
 
@@ -66,10 +66,10 @@ for i in range(1, files + 1):
                 #     writer = csv.writer(f)
                 #     writer.writerow(['X', 'Y', 'Z'])
                 #     writer.writerows(object_positions)
-                with open('./mediapipe_videos/csv_camera_pos/shot_' + str(i) + '.csv', 'w') as f:
+                with open('./mediapipe_videos/csv_camera_pos/shot_' + str(i) + '.csv', 'w', newline='') as f:
                     writer = csv.writer(f)
-                    writer.writerow(['X', 'Y', 'Z'])
-                    writer.writerows(camera_positions)
+                    # writer.writerow(['X', 'Y', 'Z'])
+                    writer.writerows(camera_positions[1:])
                 # If loading a video, use 'break' instead of 'continue'.
                 break
 

@@ -11,7 +11,7 @@ def read_coordinates():
     data_length = []
     for root, dirs, files in os.walk(fullpath):
         for idx, f in enumerate(files):
-            if f.endswith('.pt'):
+            if f.endswith('5.pt'):
                 data.append(torch.load(fullpath + f))
                 data_length.append(data[-1].shape[0])
 
