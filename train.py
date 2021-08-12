@@ -1,5 +1,5 @@
 from read_data import read_coordinates
-from model import Discriminator, Generator
+from model_dcgan import Discriminator, Generator
 import torch
 from torch.utils.tensorboard import SummaryWriter
 
@@ -20,6 +20,7 @@ print(train_data.shape)
 
 # create training dataset
 train_data_length, train_data_pos, train_data_dim = train_data.shape
+print('Trained frames number', train_data_pos)
 train_labels = torch.zeros(train_data_length)
 train_set = [(train_data[i], train_labels[i]) for i in range(train_data_length)]
 
@@ -29,15 +30,16 @@ else:
     device = torch.device('cpu')
 print('Using:', device, 'for training')
 
-# create discriminator and generator
-discriminator = Discriminator(train_data_pos).to(device=device)
-generator = Generator(10, train_data_pos).to(device=device)
-
 # hyperparameters
 lr = 0.001
 epochs = 15000
-batch_size = 1
+batch_size = 2
+hidden_size = 64
 loss_function = torch.nn.BCELoss()
+
+# create discriminator and generator
+discriminator = Discriminator(train_data_pos, hidden_size).to(device=device)
+generator = Generator(10, hidden_size, train_data_pos).to(device=device)
 
 optimizer_discriminator = torch.optim.Adam(discriminator.parameters(), lr=lr)
 optimizer_generator = torch.optim.Adam(generator.parameters(), lr=lr)
@@ -52,9 +54,10 @@ for epoch in range(epochs):
         real_samples = real_samples.to(device=device)
         real_samples_labels = torch.ones((batch_size, 1)).to(device=device)
 
-        latent_space_samples = torch.randn((batch_size, 10)).to(device=device)
+        latent_space_samples = torch.randn((batch_size, 10, 1)).to(device=device)
         generated_samples = generator(latent_space_samples)
         generated_labels = torch.zeros((batch_size, 1)).to(device=device)
+
 
         all_samples = torch.cat((real_samples, generated_samples))
         all_labels = torch.cat((real_samples_labels, generated_labels))
@@ -67,7 +70,7 @@ for epoch in range(epochs):
         optimizer_discriminator.step()
 
         # Data for training the generator
-        latent_space_samples = torch.randn((batch_size, 10)).to(device=device)
+        latent_space_samples = torch.randn((batch_size, 10, 1)).to(device=device)
 
         # Training the generator
         generator.zero_grad()

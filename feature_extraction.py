@@ -73,9 +73,6 @@ for i in range(1, files + 1):
                 # If loading a video, use 'break' instead of 'continue'.
                 break
 
-            # Flip the image horizontally for a later selfie-view display, and convert
-            # the BGR image to RGB.
-            # image = cv2.cvtColor(cv2.flip(image, 1), cv2.COLOR_BGR2RGB)
 
             # image = cv2.boxFilter(image, -1, (3, 3), normalize=1)
             # image = cv2.pyrMeanShiftFiltering(image, 10, 10,)  # 濾波
@@ -87,7 +84,7 @@ for i in range(1, files + 1):
 
             # To improve performance, optionally mark the image as not writeable to
             # pass by reference.
-            # image.flags.writeable = False
+            image.flags.writeable = False
             results = pose.process(image)
 
             try:
@@ -123,9 +120,10 @@ for i in range(1, files + 1):
                      [right_eye_2d.x * image_width, right_eye_2d.y * image_height],]
                 )
 
+
                 np_3d =  np.array(
                     [[nose_3d.x * image_width, nose_3d.y * image_height, nose_3d.z * image_width],
-                     [left_shoulder_3d.x * image_width, left_shoulder_3d.y * image_height, left_shoulder_3d.z * image_width],
+                    [left_shoulder_3d.x * image_width, left_shoulder_3d.y * image_height, left_shoulder_3d.z * image_width],
                      [right_shoulder_3d.x * image_width, right_shoulder_3d.y * image_height, right_shoulder_3d.z * image_width],
                      [left_hip_3d.x * image_width, left_hip_3d.y * image_height, left_hip_3d.z * image_width],
                      [right_hip_3d.x * image_width, right_hip_3d.y * image_height, right_hip_3d.z * image_width],
@@ -213,12 +211,13 @@ for i in range(1, files + 1):
 
                 # 過濾
                 # if first and (abs(nose_end_point2D[0][0][0] - nose_2d.x * image_width) <= 5 or abs(nose_end_point2D[0][0][1] - nose_2d.y * image_height) <= 5):
-                if first and (abs(camera_coordinates[0] - image_width / 2) < 10) and (abs(camera_coordinates[1] - image_height / 2) < 10):
+                if first and (abs(camera_coordinates[0] - image_width / 2) < 10) and (abs(camera_coordinates[1] - image_height / 2) < 10) \
+                         and (abs(nose_coordinates[0] - nose_2d.x * image_width) < 10) and (abs(nose_coordinates[1] - nose_2d.y * image_height) < 10):
                     previous_3d_camera = Position(camera_position.x, camera_position.y, camera_position.z)
                     first = False
 
                 # Draw the pose annotation on the image.
-                # image.flags.writeable = True
+                image.flags.writeable = True
                 image = cv2.cvtColor(image, cv2.COLOR_RGB2BGR)
                 mp_drawing.draw_landmarks(image, results.pose_landmarks, mp_pose.POSE_CONNECTIONS)
 
@@ -233,7 +232,8 @@ for i in range(1, files + 1):
                 cv2.imshow('MediaPipe Pose', image)
 
                 # if abs(nose_end_point2D[0][0][0] - nose_2d.x * image_width) > 15 or abs(nose_end_point2D[0][0][1] - nose_2d.y * image_height) > 15:
-                if (abs(int(camera_end_point2D[0][0][0]) - image_width / 2) > 10) and (abs(int(camera_end_point2D[0][0][1]) - image_height / 2) > 10):
+                if (abs(int(camera_end_point2D[0][0][0]) - image_width / 2) > 10) and (abs(int(camera_end_point2D[0][0][1]) - image_height / 2) > 10) \
+                    and (abs(nose_coordinates[0] - nose_2d.x * image_width) > 10) and (abs(nose_coordinates[1] - nose_2d.y * image_height) > 10):
                     camera_x[-1] = previous_3d_camera.x
                     camera_y[-1] = previous_3d_camera.y
                     camera_z[-1] = previous_3d_camera.z

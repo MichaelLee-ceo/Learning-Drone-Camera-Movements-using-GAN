@@ -19,7 +19,7 @@ def func(num, dataSet, line):
 
 
 # THE DATA POINTS
-camera_positions = torch.load('./mediapipe_videos/coordinates_camera_pos/shot_3.pt').numpy()
+camera_positions = torch.load('./mediapipe_videos/coordinates_camera_pos/shot_7.pt').numpy()
 x = camera_positions[:, 0]
 y = camera_positions[:, 1]
 z = camera_positions[:, 2]
@@ -29,7 +29,7 @@ numDataPoints = camera_positions.shape[0]
 
 # GET SOME MATPLOTLIB OBJECTS
 fig = plt.figure()
-ax = Axes3D(fig)
+ax = plt.axes(projection='3d')  # 用這個繪圖物件建立一個Axes物件(有3D座標)
 
 # NOTE: Can't pass empty arrays into 3d version of plot()
 ax.scatter3D(0, 0, 0, c='b')  # For line plot
