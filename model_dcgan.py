@@ -12,15 +12,15 @@ class Discriminator(nn.Module):
             nn.BatchNorm1d(hiddenSize * 2),
             nn.LeakyReLU(0.2, inplace=True),
 
-            nn.Conv1d(hiddenSize * 2, hiddenSize * 4, 3, 1, 1, bias=False),
-            nn.BatchNorm1d(hiddenSize * 4),
-            nn.LeakyReLU(0.2, inplace=True),
+            # nn.Conv1d(hiddenSize * 2, hiddenSize * 4, 3, 1, 1, bias=False),
+            # nn.BatchNorm1d(hiddenSize * 4),
+            # nn.LeakyReLU(0.2, inplace=True),
             #
             # nn.Conv1d(hiddenSize * 4, hiddenSize * 8, 4, 2, 1, bias=False),
             # nn.BatchNorm1d(hiddenSize * 8),
             # nn.LeakyReLU(0.2, inplace=True),
 
-            nn.Conv1d(hiddenSize * 4, 1, 3, 1, 0, bias=False),
+            nn.Conv1d(hiddenSize * 2, 1, 3, 1, 0, bias=False),
             nn.Sigmoid(),
         )
 
