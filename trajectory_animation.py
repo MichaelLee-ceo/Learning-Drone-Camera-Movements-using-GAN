@@ -3,7 +3,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 import matplotlib.animation as animation
 from mpl_toolkits.mplot3d import Axes3D
-
+from read_data import read_coordinates
 
 # References
 # https://gist.github.com/neale/e32b1f16a43bfdc0608f45a504df5a84
@@ -19,11 +19,14 @@ def func(num, dataSet, line):
 
 
 # THE DATA POINTS
-camera_positions = torch.load('./mediapipe_videos/coordinates_camera_pos/shot_7.pt').numpy()
+# camera_positions = torch.load('./mediapipe_videos/coordinates_camera_pos/shot_7.pt').numpy()
+train_data = read_coordinates()
+camera_positions = train_data[4].numpy()
 x = camera_positions[:, 0]
 y = camera_positions[:, 1]
 z = camera_positions[:, 2]
 
+print(x, y, z)
 dataSet = np.array([x, z, y])
 numDataPoints = camera_positions.shape[0]
 

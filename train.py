@@ -1,10 +1,14 @@
 from read_data import read_coordinates
 from model_dcgan import Discriminator, Generator
 import torch
+import random
+import matplotlib.pyplot as plt
+from mpl_toolkits.mplot3d import Axes3D
 from torch.utils.tensorboard import SummaryWriter
 
 train_data = read_coordinates()
 train_data = torch.nn.functional.normalize(train_data)
+random.shuffle(train_data)
 # max_value = torch.max(torch.abs(train_data))
 
 # print('Normalize by(max tensor value):', max_value)
@@ -32,7 +36,7 @@ print('Using:', device, 'for training')
 
 # hyperparameters
 lr = 0.001
-epochs = 15000
+epochs = 20000
 batch_size = 2
 hidden_size = 16
 loss_function = torch.nn.BCELoss()
@@ -87,8 +91,23 @@ for epoch in range(epochs):
 
             writer.add_scalar("D: Loss/train", loss_discriminator, epoch)
             writer.add_scalar("G: Loss/train", loss_generator, epoch)
-            # print(output_generator[0, :5])
-            # print(train_data[0, :5])
+
+            if epoch % 1000 == 0:
+                latent_samples = torch.randn((1, 100, 1)).cuda()
+                generated_samples = generator(latent_samples).cpu()
+                generated_samples = generated_samples.view(generated_samples.shape[1], generated_samples.shape[2])
+
+                x = generated_samples[:, 0].detach().numpy()
+                y = generated_samples[:, 1].detach().numpy()
+                z = generated_samples[:, 2].detach().numpy()
+
+                ax = plt.axes(projection='3d')  # 用這個繪圖物件建立一個Axes物件(有3D座標)
+                ax.set_xlabel('x label')
+                ax.set_ylabel('z label')
+                ax.set_zlabel('y label')  # 給三個座標軸註明
+                ax.scatter3D(x, z, y, color='Orange')
+                ax.scatter3D(0, 0, 0, color='Blue')
+                plt.savefig('./results/' + str(epoch) + '.png')
 
 torch.save(generator.model, 'model.h5')
 writer.flush()

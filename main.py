@@ -4,7 +4,7 @@ import matplotlib.pyplot as plt
 from mpl_toolkits.mplot3d import Axes3D
 from model_dcgan import Generator
 
-generator = Generator(100, 16, 33)
+generator = Generator(100, 16, 38)
 generator.model = torch.load('model.h5')
 
 latent_space_samples = torch.randn((1, 100, 1)).cuda()

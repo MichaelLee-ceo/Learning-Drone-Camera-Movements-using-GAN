@@ -9,29 +9,31 @@ class Discriminator(nn.Module):
             # nn.BatchNorm1d(hiddenSize * 8),
             # nn.MaxPool1d(kernel_size=3),
             nn.LeakyReLU(),
-            nn.Dropout(0.25),
+            nn.Dropout(0.3),
 
             nn.Conv1d(hiddenSize * 32, hiddenSize * 16, kernel_size=3, stride=1, padding=1),
             # nn.BatchNorm1d(hiddenSize * 4),
             # nn.MaxPool1d(kernel_size=3),
             nn.LeakyReLU(),
-            nn.Dropout(0.25),
+            nn.Dropout(0.3),
 
             nn.Conv1d(hiddenSize * 16, hiddenSize * 8, kernel_size=3, stride=1, padding=1),
             # nn.BatchNorm1d(hiddenSize * 2),
             # nn.MaxPool1d(kernel_size=3),
             nn.LeakyReLU(),
-            nn.Dropout(0.25),
+            nn.Dropout(0.3),
 
             nn.Conv1d(hiddenSize * 8, hiddenSize * 4, kernel_size=3, stride=1, padding=1),
             # nn.BatchNorm1d(hiddenSize * 2),
             # nn.MaxPool1d(kernel_size=3),
             nn.LeakyReLU(),
-            nn.Dropout(0.25),
+            nn.Dropout(0.3),
 
             nn.Flatten(),
 
-            nn.Linear(hiddenSize *4 * 3, 1),
+            nn.Linear(hiddenSize *4 * 3, hiddenSize*2),
+            nn.ReLU(),
+            nn.Linear(hiddenSize *2, 1),
             nn.Sigmoid(),
         )
 

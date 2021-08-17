@@ -33,8 +33,8 @@ def read_coordinates():
     # prev_data += data
     # print(lambda data:data[0])
 
-    sorted_data = sorted(data[0], key=lambda x: x[0])
-    print(data[0])
-    print(sorted_data)
+    sorted_data = []
+    for i in range(len(data)):
+        sorted_data.append(torch.stack(sorted(data[i], key=lambda x: x[0])))
 
     return torch.stack(sorted_data)
