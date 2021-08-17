@@ -1,4 +1,5 @@
 import torch
+from read_data import read_coordinates
 import matplotlib.pyplot as plt
 from mpl_toolkits.mplot3d import Axes3D
 from model_dcgan import Generator

@@ -28,8 +28,13 @@ def read_coordinates():
         data[i] = data[i][:mean_data_count]
 
     # reverse trajectories
-    prev_data = data
-    data.reverse()
-    prev_data += data
+    # prev_data = data
+    # data.reverse()
+    # prev_data += data
+    # print(lambda data:data[0])
 
-    return torch.stack(prev_data)
+    sorted_data = sorted(data[0], key=lambda x: x[0])
+    print(data[0])
+    print(sorted_data)
+
+    return torch.stack(sorted_data)

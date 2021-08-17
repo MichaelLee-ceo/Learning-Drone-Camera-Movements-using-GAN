@@ -167,7 +167,7 @@ for i in range(1, files + 1):
                     average_camera_pos.x = sum(list(camera_x[frame_idx : (frame_idx + average_frame_count)])) / average_frame_count
                     average_camera_pos.y = sum(list(camera_y[frame_idx : (frame_idx + average_frame_count)])) / average_frame_count
                     average_camera_pos.z = sum(list(camera_z[frame_idx : (frame_idx + average_frame_count)])) / average_frame_count
-                    camera_positions.append([average_camera_pos.x, average_camera_pos.y, average_camera_pos.z])
+                    camera_positions.append((average_camera_pos.x, average_camera_pos.y, average_camera_pos.z))
                     print('Average position', average_camera_pos.x, average_camera_pos.y, average_camera_pos.z)
 
                 # nose 在 3D(world space) 的位置

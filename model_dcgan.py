@@ -5,19 +5,25 @@ class Discriminator(nn.Module):
         super().__init__()
         self.inputSize = inputSize
         self.model = nn.Sequential(
-            nn.Conv1d(inputSize, hiddenSize * 8, kernel_size=3, stride=1, padding=1),
+            nn.Conv1d(inputSize, hiddenSize * 32, kernel_size=3, stride=1, padding=1),
             # nn.BatchNorm1d(hiddenSize * 8),
             # nn.MaxPool1d(kernel_size=3),
             nn.LeakyReLU(),
             nn.Dropout(0.25),
 
-            nn.Conv1d(hiddenSize * 8, hiddenSize * 4, kernel_size=3, stride=1, padding=1),
+            nn.Conv1d(hiddenSize * 32, hiddenSize * 16, kernel_size=3, stride=1, padding=1),
             # nn.BatchNorm1d(hiddenSize * 4),
             # nn.MaxPool1d(kernel_size=3),
             nn.LeakyReLU(),
             nn.Dropout(0.25),
 
-            nn.Conv1d(hiddenSize * 4, hiddenSize * 2, kernel_size=3, stride=1, padding=1),
+            nn.Conv1d(hiddenSize * 16, hiddenSize * 8, kernel_size=3, stride=1, padding=1),
+            # nn.BatchNorm1d(hiddenSize * 2),
+            # nn.MaxPool1d(kernel_size=3),
+            nn.LeakyReLU(),
+            nn.Dropout(0.25),
+
+            nn.Conv1d(hiddenSize * 8, hiddenSize * 4, kernel_size=3, stride=1, padding=1),
             # nn.BatchNorm1d(hiddenSize * 2),
             # nn.MaxPool1d(kernel_size=3),
             nn.LeakyReLU(),
@@ -25,7 +31,7 @@ class Discriminator(nn.Module):
 
             nn.Flatten(),
 
-            nn.Linear(hiddenSize * 2 * 3, 1),
+            nn.Linear(hiddenSize *4 * 3, 1),
             nn.Sigmoid(),
         )
 
