@@ -34,12 +34,12 @@ print('Using:', device, 'for training')
 lr = 0.001
 epochs = 15000
 batch_size = 2
-hidden_size = 64
+hidden_size = 16
 loss_function = torch.nn.BCELoss()
 
 # create discriminator and generator
 discriminator = Discriminator(train_data_pos, hidden_size).to(device=device)
-generator = Generator(10, hidden_size, train_data_pos).to(device=device)
+generator = Generator(100, hidden_size, train_data_pos).to(device=device)
 
 optimizer_discriminator = torch.optim.Adam(discriminator.parameters(), lr=lr)
 optimizer_generator = torch.optim.Adam(generator.parameters(), lr=lr)
@@ -54,7 +54,7 @@ for epoch in range(epochs):
         real_samples = real_samples.to(device=device)
         real_samples_labels = torch.ones((batch_size, 1)).to(device=device)
 
-        latent_space_samples = torch.randn((batch_size, 10, 1)).to(device=device)
+        latent_space_samples = torch.randn((batch_size, 100, 1)).to(device=device)
         generated_samples = generator(latent_space_samples)
         generated_labels = torch.zeros((batch_size, 1)).to(device=device)
 
@@ -70,7 +70,7 @@ for epoch in range(epochs):
         optimizer_discriminator.step()
 
         # Data for training the generator
-        latent_space_samples = torch.randn((batch_size, 10, 1)).to(device=device)
+        latent_space_samples = torch.randn((batch_size, 100, 1)).to(device=device)
 
         # Training the generator
         generator.zero_grad()

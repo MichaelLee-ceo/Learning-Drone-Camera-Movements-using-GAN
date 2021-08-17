@@ -11,3 +11,6 @@
 *.pt
 *.csv
 *.png
+
+# ignore runs
+* .0
