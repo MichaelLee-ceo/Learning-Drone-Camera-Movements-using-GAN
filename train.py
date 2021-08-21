@@ -2,9 +2,13 @@ from read_data import read_coordinates
 from model_dcgan import Discriminator, Generator
 import torch
 import random
+import os, datetime
 import matplotlib.pyplot as plt
 from mpl_toolkits.mplot3d import Axes3D
 from torch.utils.tensorboard import SummaryWriter
+
+dir = os.path.join(os.getcwd() + '/results/', datetime.datetime.now().strftime('%Y-%m-%d_%H-%M-%S'))
+os.mkdir(dir)
 
 train_data = read_coordinates()
 train_data = torch.nn.functional.normalize(train_data)
@@ -42,7 +46,7 @@ hidden_size = 16
 loss_function = torch.nn.BCELoss()
 
 # create discriminator and generator
-discriminator = Discriminator(train_data_pos, hidden_size).to(device=device)
+discriminator = Discriminator(hidden_size, train_data_pos).to(device=device)
 generator = Generator(100, hidden_size, train_data_pos).to(device=device)
 
 optimizer_discriminator = torch.optim.Adam(discriminator.parameters(), lr=lr)
@@ -51,14 +55,14 @@ optimizer_generator = torch.optim.Adam(generator.parameters(), lr=lr)
 train_loader = torch.utils.data.DataLoader(train_set, batch_size=batch_size, shuffle=True)
 
 
-for epoch in range(epochs):
+for epoch in range(1, epochs+1):
     # print(epoch)
     for idx, (real_samples, _) in enumerate(train_loader):
         # Data for training the discriminator
         real_samples = real_samples.to(device=device)
         real_samples_labels = torch.ones((batch_size, 1)).to(device=device)
 
-        latent_space_samples = torch.randn((batch_size, 100, 1)).to(device=device)
+        latent_space_samples = torch.randn((batch_size, 1, 100)).to(device=device)
         generated_samples = generator(latent_space_samples)
         generated_labels = torch.zeros((batch_size, 1)).to(device=device)
 
@@ -74,7 +78,7 @@ for epoch in range(epochs):
         optimizer_discriminator.step()
 
         # Data for training the generator
-        latent_space_samples = torch.randn((batch_size, 100, 1)).to(device=device)
+        latent_space_samples = torch.randn((batch_size, 1, 100)).to(device=device)
 
         # Training the generator
         generator.zero_grad()
@@ -93,7 +97,7 @@ for epoch in range(epochs):
             writer.add_scalar("G: Loss/train", loss_generator, epoch)
 
             if epoch % 1000 == 0:
-                latent_samples = torch.randn((1, 100, 1)).cuda()
+                latent_samples = torch.randn((1, 1, 100)).cuda()
                 generated_samples = generator(latent_samples).cpu()
                 generated_samples = generated_samples.view(generated_samples.shape[1], generated_samples.shape[2])
 
@@ -107,8 +111,8 @@ for epoch in range(epochs):
                 ax.set_zlabel('y label')  # 給三個座標軸註明
                 ax.scatter3D(x, z, y, color='Orange')
                 ax.scatter3D(0, 0, 0, color='Blue')
-                plt.savefig('./results/' + str(epoch) + '.png')
+                plt.savefig(dir + '/' + str(epoch) + '.png')
 
-torch.save(generator.model, 'model.h5')
+                torch.save(generator.model, './models/epoch_' + str(epoch) + '_model.h5')
 writer.flush()
 writer.close()

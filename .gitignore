@@ -13,4 +13,13 @@
 *.png
 
 # ignore runs
-* .0
+runs/
+
+# ignore models / results
+models/
+results/
+  
+# Byte-compiled / optimized / DLL files
+__pycache__/
+*.py[cod]
+*$py.class
