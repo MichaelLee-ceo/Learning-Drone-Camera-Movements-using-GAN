@@ -26,8 +26,12 @@ class Discriminator(nn.Module):
 
             nn.Flatten(),
 
-            nn.Linear(hiddenSize * 2 * frame_num, hiddenSize),
+            nn.Linear(hiddenSize * 2 * frame_num, hiddenSize * 2),
             nn.LeakyReLU(0.2),
+            nn.Dropout(0.5),
+            nn.Linear(hiddenSize * 2, hiddenSize),
+            nn.LeakyReLU(0.2),
+            nn.Dropout(0.5),
             nn.Linear(hiddenSize, 1),
             nn.Sigmoid(),
         )
@@ -59,9 +63,6 @@ class Generator(nn.Module):
             nn.Conv1d(hiddenSize*8, hiddenSize*16, kernel_size=3, stride=1, padding=1),
             # nn.BatchNorm1d(hiddenSize * 16),
             nn.ReLU(),
-
-            # nn.Conv1d(hiddenSize*32, hiddenSize*64, kernel_size=3, stride=1, padding=1),
-            # nn.ReLU(),
 
             nn.Flatten(),
 

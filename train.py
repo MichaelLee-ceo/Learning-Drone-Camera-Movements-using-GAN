@@ -10,6 +10,9 @@ from torch.utils.tensorboard import SummaryWriter
 dir = os.path.join(os.getcwd() + '/results/', datetime.datetime.now().strftime('%Y-%m-%d_%H-%M-%S'))
 os.mkdir(dir)
 
+# fixed random generator seed
+torch.manual_seed(10)
+
 train_data = read_coordinates()
 train_data = torch.nn.functional.normalize(train_data)
 random.shuffle(train_data)
@@ -17,9 +20,6 @@ random.shuffle(train_data)
 
 # print('Normalize by(max tensor value):', max_value)
 # train_data /= max_value
-
-# fixed random generator seed
-torch.manual_seed(10)
 
 # record for TensorBoard
 writer = SummaryWriter()
@@ -41,7 +41,7 @@ print('Using:', device, 'for training')
 # hyperparameters
 lr = 0.001
 epochs = 20000
-batch_size = 2
+batch_size = 4
 hidden_size = 16
 loss_function = torch.nn.BCELoss()
 
