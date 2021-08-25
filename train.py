@@ -1,3 +1,4 @@
+import argparse
 from read_data import read_coordinates
 from model_dcgan import Discriminator, Generator
 import torch
@@ -6,7 +7,28 @@ import os, datetime
 import matplotlib.pyplot as plt
 from mpl_toolkits.mplot3d import Axes3D
 from torch.utils.tensorboard import SummaryWriter
+import time
 
+start = time.time()
+
+parser = argparse.ArgumentParser()
+parser.add_argument("--hidden_size", type=int, default=16, help="hidden filter channels")
+parser.add_argument("--drop_out", type=float, default=0.5, help="drop out percentage")
+parser.add_argument("--learning_rate", type=float, default=0.001, help="learning_rate")
+parser.add_argument("--epochs", type=int, default=20000, help="epochs")
+parser.add_argument("--batch_size", type=int, default=4, help="batch size")
+args = parser.parse_args()
+
+# hyperparameters
+lr = args.learning_rate
+epochs = args.epochs
+batch_size = args.batch_size
+hidden_size = args.hidden_size
+drop_out = args.drop_out
+loss_function = torch.nn.BCELoss()
+
+# fixed random generator seed
+torch.manual_seed(10)
 
 current_dir = os.getcwd()
 
@@ -19,24 +41,20 @@ if not os.path.isdir(os.path.join(current_dir, 'models')):
     os.mkdir(os.path.join(current_dir, 'models'))
 
 # create temporary result file
-result_file = os.path.join(current_dir + '/results/', datetime.datetime.now().strftime('%Y-%m-%d_%H-%M-%S'))
+result_file = os.path.join(current_dir + '/results/', 'lr' + str(lr) + 'hd' + str(hidden_size) + 'bt' + str(batch_size) + 'dp' + str(drop_out) + 'ep' + str(epochs))
 os.mkdir(result_file)
-
-# fixed random generator seed
-torch.manual_seed(10)
 
 train_data = read_coordinates()
 train_data = torch.nn.functional.normalize(train_data)
 random.shuffle(train_data)
 # max_value = torch.max(torch.abs(train_data))
+print(train_data.shape)
 
 # print('Normalize by(max tensor value):', max_value)
 # train_data /= max_value
 
 # record for TensorBoard
 writer = SummaryWriter()
-
-print(train_data.shape)
 
 # create training dataset
 train_data_length, train_data_pos, train_data_dim = train_data.shape
@@ -50,15 +68,8 @@ else:
     device = torch.device('cpu')
 print('Using:', device, 'for training')
 
-# hyperparameters
-lr = 0.001
-epochs = 20000
-batch_size = 4
-hidden_size = 16
-loss_function = torch.nn.BCELoss()
-
 # create discriminator and generator
-discriminator = Discriminator(hidden_size, train_data_pos).to(device=device)
+discriminator = Discriminator(hidden_size, train_data_pos, drop_out).to(device=device)
 generator = Generator(100, hidden_size, train_data_pos).to(device=device)
 
 optimizer_discriminator = torch.optim.Adam(discriminator.parameters(), lr=lr)
@@ -128,3 +139,6 @@ for epoch in range(1, epochs+1):
                 torch.save(generator.model, './models/epoch_' + str(epoch) + '_model.h5')
 writer.flush()
 writer.close()
+
+end = time.time()
+print('Training duration:', (end - start) / 1000)

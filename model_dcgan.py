@@ -1,37 +1,37 @@
 from torch import nn
 
 class Discriminator(nn.Module):
-    def __init__(self, hiddenSize, frame_num):
+    def __init__(self, hiddenSize, frame_num, drop_rate):
         super().__init__()
         self.model = nn.Sequential(
             nn.Conv1d(3, hiddenSize * 16, kernel_size=3, stride=1, padding=1),
             # nn.BatchNorm1d(hiddenSize * 16),
             nn.LeakyReLU(0.2),
-            nn.Dropout(0.5),
+            nn.Dropout(drop_rate),
 
             nn.Conv1d(hiddenSize * 16, hiddenSize * 8, kernel_size=3, stride=1, padding=1),
             # nn.BatchNorm1d(hiddenSize * 8),
             nn.LeakyReLU(0.2),
-            nn.Dropout(0.5),
+            nn.Dropout(drop_rate),
 
             nn.Conv1d(hiddenSize * 8, hiddenSize * 4, kernel_size=3, stride=1, padding=1),
             # nn.BatchNorm1d(hiddenSize * 4),
             nn.LeakyReLU(0.2),
-            nn.Dropout(0.5),
+            nn.Dropout(drop_rate),
 
             nn.Conv1d(hiddenSize * 4, hiddenSize * 2, kernel_size=3, stride=1, padding=1),
             # nn.BatchNorm1d(hiddenSize * 2),
             nn.LeakyReLU(0.2),
-            nn.Dropout(0.5),
+            nn.Dropout(drop_rate),
 
             nn.Flatten(),
 
             nn.Linear(hiddenSize * 2 * frame_num, hiddenSize * 2),
             nn.LeakyReLU(0.2),
-            nn.Dropout(0.5),
+            nn.Dropout(drop_rate),
             nn.Linear(hiddenSize * 2, hiddenSize),
             nn.LeakyReLU(0.2),
-            nn.Dropout(0.5),
+            nn.Dropout(drop_rate),
             nn.Linear(hiddenSize, 1),
             nn.Sigmoid(),
         )
