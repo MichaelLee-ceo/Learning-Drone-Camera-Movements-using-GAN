@@ -7,8 +7,20 @@ import matplotlib.pyplot as plt
 from mpl_toolkits.mplot3d import Axes3D
 from torch.utils.tensorboard import SummaryWriter
 
-dir = os.path.join(os.getcwd() + '/results/', datetime.datetime.now().strftime('%Y-%m-%d_%H-%M-%S'))
-os.mkdir(dir)
+
+current_dir = os.getcwd()
+
+# create results file
+if not os.path.isdir(os.path.join(current_dir, 'results')):
+    os.mkdir(os.path.join(current_dir, 'results'))
+
+# create models file
+if not os.path.isdir(os.path.join(current_dir, 'models')):
+    os.mkdir(os.path.join(current_dir, 'models'))
+
+# create temporary result file
+os.mkdir(os.path.join(current_dir + '/results/', datetime.datetime.now().strftime('%Y-%m-%d_%H-%M-%S')))
+
 
 # fixed random generator seed
 torch.manual_seed(10)

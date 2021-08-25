@@ -4,7 +4,7 @@ import math
 import numpy as np
 
 def read_coordinates():
-    data_path = './mediapipe_videos/coordinates_camera_pos/'
+    data_path = '/mediapipe_videos/coordinates_camera_pos/'
     fullpath = os.path.join(os.getcwd() + data_path)
 
     data = []
