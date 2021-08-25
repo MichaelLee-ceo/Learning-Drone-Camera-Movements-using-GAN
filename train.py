@@ -19,8 +19,8 @@ if not os.path.isdir(os.path.join(current_dir, 'models')):
     os.mkdir(os.path.join(current_dir, 'models'))
 
 # create temporary result file
-os.mkdir(os.path.join(current_dir + '/results/', datetime.datetime.now().strftime('%Y-%m-%d_%H-%M-%S')))
-
+result_file = os.path.join(current_dir + '/results/', datetime.datetime.now().strftime('%Y-%m-%d_%H-%M-%S'))
+os.mkdir(result_file)
 
 # fixed random generator seed
 torch.manual_seed(10)
@@ -123,7 +123,7 @@ for epoch in range(1, epochs+1):
                 ax.set_zlabel('y label')  # 給三個座標軸註明
                 ax.scatter3D(x, z, y, color='Orange')
                 ax.scatter3D(0, 0, 0, color='Blue')
-                plt.savefig(dir + '/' + str(epoch) + '.png')
+                plt.savefig(result_file + '/' + str(epoch) + '.png')
 
                 torch.save(generator.model, './models/epoch_' + str(epoch) + '_model.h5')
 writer.flush()
