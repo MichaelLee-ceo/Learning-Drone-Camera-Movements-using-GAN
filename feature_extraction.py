@@ -229,7 +229,7 @@ for i in range(1, files + 1):
                 cv2.circle(image, (int(camera_coordinates[0]), int(camera_coordinates[1])), 5, (255, 0, 255), -1)
                 #  影像中心點
                 cv2.circle(image, (int(image_width/2), int(image_height/2)), 5, (255, 255, 255), 2)
-                cv2.imshow('MediaPipe Pose', image)
+                # cv2.imshow('MediaPipe Pose', image)
 
                 # if abs(nose_end_point2D[0][0][0] - nose_2d.x * image_width) > 15 or abs(nose_end_point2D[0][0][1] - nose_2d.y * image_height) > 15:
                 if (abs(int(camera_end_point2D[0][0][0]) - image_width / 2) > 10) and (abs(int(camera_end_point2D[0][0][1]) - image_height / 2) > 10) \
