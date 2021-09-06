@@ -25,7 +25,7 @@ mp_pose = mp.solutions.pose
 
 average_frame_count = 10
 
-for i in range(1, files + 1):
+for i in range(89, files + 1):
     cap = cv2.VideoCapture(video_path + 'shot_' + str(i) + '.mp4')
     out = cv2.VideoWriter(write_path + 'shot_pose_' + str(i) + '.avi', cv2.VideoWriter_fourcc(*'XVID'), 30, (640, 360))
 

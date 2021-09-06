@@ -9,8 +9,6 @@ from mpl_toolkits.mplot3d import Axes3D
 from torch.utils.tensorboard import SummaryWriter
 import time
 
-start = time.time()
-
 parser = argparse.ArgumentParser()
 parser.add_argument("--hidden_size", type=int, default=16, help="hidden filter channels")
 parser.add_argument("--drop_out", type=float, default=0.5, help="drop out percentage")
@@ -40,111 +38,124 @@ if not os.path.isdir(os.path.join(current_dir, 'results')):
 if not os.path.isdir(os.path.join(current_dir, 'models')):
 	os.mkdir(os.path.join(current_dir, 'models'))
 
-train_setting = 'lr' + str(lr) + 'hd' + str(hidden_size) + 'bt' + str(batch_size) + 'dp' + str(drop_out) + 'ep' + str(epochs)
-print("\n\n##########", train_setting)
-
-# create temporary model file
-model_file = os.path.join(current_dir + '/models/', train_setting)
-os.mkdir(model_file)
-
-# create temporary result file
-result_file = os.path.join(current_dir + '/results/', train_setting)
-os.mkdir(result_file)
-
-train_data = read_coordinates()
+train_data = read_coordinates()[:100]
 train_data = torch.nn.functional.normalize(train_data)
 random.shuffle(train_data)
 # max_value = torch.max(torch.abs(train_data))
 print(train_data.shape)
-
-# print('Normalize by(max tensor value):', max_value)
-# train_data /= max_value
-
-# record for TensorBoard
-writer = SummaryWriter()
 
 # create training dataset
 train_data_length, train_data_pos, train_data_dim = train_data.shape
 print('Trained frames number', train_data_pos)
 train_labels = torch.zeros(train_data_length)
 train_set = [(train_data[i], train_labels[i]) for i in range(train_data_length)]
-
-if torch.cuda.is_available():
-	device = torch.device('cuda')
-else:
-	device = torch.device('cpu')
-print('Using:', device, 'for training')
-
-# create discriminator and generator
-discriminator = Discriminator(hidden_size, train_data_pos, drop_out).to(device=device)
-generator = Generator(100, hidden_size, train_data_pos).to(device=device)
-
-optimizer_discriminator = torch.optim.Adam(discriminator.parameters(), lr=lr)
-optimizer_generator = torch.optim.Adam(generator.parameters(), lr=lr)
-
 train_loader = torch.utils.data.DataLoader(train_set, batch_size=batch_size, shuffle=True)
 
-for epoch in range(1, epochs+1):
-	# print(epoch)
-	for idx, (real_samples, _) in enumerate(train_loader):
-		# Data for training the discriminator
-		real_samples = real_samples.to(device=device)
-		real_samples_labels = torch.ones((batch_size, 1)).to(device=device)
+hidden_sizes = [2, 4, 8, 16, 32]
+drop_outs = [0.25, 0.5, 0.7]
 
-		latent_space_samples = torch.randn((batch_size, 1, 100)).to(device=device)
-		generated_samples = generator(latent_space_samples)
-		generated_labels = torch.zeros((batch_size, 1)).to(device=device)
+# fixed generator noise
+latent_samples = torch.randn((1, 1, 100)).cuda()
+
+for hidden_size in hidden_sizes:
+    for drop_out in drop_outs:
+        start = time.time()
+
+        train_setting = 'lr' + str(lr) + 'hd' + str(hidden_size) + 'bt' + str(batch_size) + 'dp' + str(drop_out) + 'ep' + str(epochs)
+        print("\n\n##########", train_setting)
+
+        # create temporary model file
+        model_file = os.path.join(current_dir + '/models/', train_setting)
+        os.mkdir(model_file)
+
+        # create temporary result file
+        result_file = os.path.join(current_dir + '/results/', train_setting)
+        os.mkdir(result_file)
+
+        # print('Normalize by(max tensor value):', max_value)
+        # train_data /= max_value
+
+        # record for TensorBoard
+        writer = SummaryWriter()
 
 
-		all_samples = torch.cat((real_samples, generated_samples))
-		all_labels = torch.cat((real_samples_labels, generated_labels))
+        if torch.cuda.is_available():
+            device = torch.device('cuda')
+        else:
+            device = torch.device('cpu')
+        print('Using:', device, 'for training')
 
-		# Training the discriminator
-		discriminator.zero_grad()
-		output_discriminator = discriminator(all_samples)
-		loss_discriminator = loss_function(output_discriminator, all_labels)
-		loss_discriminator.backward()
-		optimizer_discriminator.step()
+        # create discriminator and generator
+        discriminator = Discriminator(hidden_size, train_data_pos, drop_out).to(device=device)
+        generator = Generator(100, hidden_size, train_data_pos).to(device=device)
 
-		# Data for training the generator
-		latent_space_samples = torch.randn((batch_size, 1, 100)).to(device=device)
+        optimizer_discriminator = torch.optim.Adam(discriminator.parameters(), lr=lr)
+        optimizer_generator = torch.optim.Adam(generator.parameters(), lr=lr)
 
-		# Training the generator
-		generator.zero_grad()
-		output_generator = generator(latent_space_samples)
-		output_discriminator_generated = discriminator(output_generator)
-		loss_generator = loss_function(output_discriminator_generated, real_samples_labels)
-		loss_generator.backward()
-		optimizer_generator.step()
 
-		# Show training loss
-		if epoch % 10 == 0 and idx == len(train_loader) - 1:
-			print(f"\nEpoch: {epoch}, Loss D.: {loss_discriminator}")
-			print(f"Epoch: {epoch}, Loss G.: {loss_generator}")
+        for epoch in range(1, epochs+1):
+            # print(epoch)
+            for idx, (real_samples, _) in enumerate(train_loader):
+                # Data for training the discriminator
+                real_samples = real_samples.to(device=device)
+                real_samples_labels = torch.ones((batch_size, 1)).to(device=device)
 
-			writer.add_scalar("D: Loss/train", loss_discriminator, epoch)
-			writer.add_scalar("G: Loss/train", loss_generator, epoch)
+                latent_space_samples = torch.randn((batch_size, 1, 100)).to(device=device)
+                generated_samples = generator(latent_space_samples)
+                generated_labels = torch.zeros((batch_size, 1)).to(device=device)
 
-			if epoch % 1000 == 0:
-				latent_samples = torch.randn((1, 1, 100)).cuda()
-				generated_samples = generator(latent_samples).cpu()
-				generated_samples = generated_samples.view(generated_samples.shape[1], generated_samples.shape[2])
 
-				x = generated_samples[:, 0].detach().numpy()
-				y = generated_samples[:, 1].detach().numpy()
-				z = generated_samples[:, 2].detach().numpy()
+                all_samples = torch.cat((real_samples, generated_samples))
+                all_labels = torch.cat((real_samples_labels, generated_labels))
 
-				ax = plt.axes(projection='3d')  # 用這個繪圖物件建立一個Axes物件(有3D座標)
-				ax.set_xlabel('x label')
-				ax.set_ylabel('z label')
-				ax.set_zlabel('y label')  # 給三個座標軸註明
-				ax.scatter3D(x, z, y, color='Orange')
-				ax.scatter3D(0, 0, 0, color='Blue')
-				plt.savefig(result_file + '/' + str(epoch) + '.png')
+                # Training the discriminator
+                discriminator.zero_grad()
+                output_discriminator = discriminator(all_samples)
+                loss_discriminator = loss_function(output_discriminator, all_labels)
+                loss_discriminator.backward()
+                optimizer_discriminator.step()
 
-				torch.save(generator.model, model_file + '/' + train_setting + '_' + str(epoch) + '_model.h5')
-writer.flush()
-writer.close()
+                # Data for training the generator
+                latent_space_samples = torch.randn((batch_size, 1, 100)).to(device=device)
 
-end = time.time()
-print('#####Training duration:', (end - start) / 60, '(minutes)')
+                # Training the generator
+                generator.zero_grad()
+                output_generator = generator(latent_space_samples)
+                output_discriminator_generated = discriminator(output_generator)
+                loss_generator = loss_function(output_discriminator_generated, real_samples_labels)
+                loss_generator.backward()
+                optimizer_generator.step()
+
+                # Show training loss
+                if epoch % 10 == 0 and idx == len(train_loader) - 1:
+                    print(f"\nEpoch: {epoch}, Loss D.: {loss_discriminator}")
+                    print(f"Epoch: {epoch}, Loss G.: {loss_generator}")
+
+                    writer.add_scalar("D: Loss/train", loss_discriminator, epoch)
+                    writer.add_scalar("G: Loss/train", loss_generator, epoch)
+
+                    if epoch % 1000 == 0:
+                        '''
+                        latent_samples = torch.randn((1, 1, 100)).cuda()
+                        '''
+                        generated_samples = generator(latent_samples).cpu()
+                        generated_samples = generated_samples.view(generated_samples.shape[1], generated_samples.shape[2])
+
+                        x = generated_samples[:, 0].detach().numpy()
+                        y = generated_samples[:, 1].detach().numpy()
+                        z = generated_samples[:, 2].detach().numpy()
+
+                        ax = plt.axes(projection='3d')  # 用這個繪圖物件建立一個Axes物件(有3D座標)
+                        ax.set_xlabel('x label')
+                        ax.set_ylabel('z label')
+                        ax.set_zlabel('y label')  # 給三個座標軸註明
+                        ax.scatter3D(x, z, y, color='Orange')
+                        ax.scatter3D(0, 0, 0, color='Blue')
+                        plt.savefig(result_file + '/' + str(epoch) + '.png')
+
+                        torch.save(generator.model, model_file + '/' + train_setting + '_' + str(epoch) + '_model.h5')
+        writer.flush()
+        writer.close()
+
+        end = time.time()
+        print('#####Training duration:', (end - start) / 60, '(minutes)')
