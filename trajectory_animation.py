@@ -59,7 +59,7 @@ def track(camera_positions, frame_space):
     line_ani = animation.FuncAnimation(fig, func, frames=numDataPoints, fargs=(dataSet, line), interval=100, blit=False)
     # line_ani.save(r'AnimationNew.mp4')
 
-    plt.show()
+    #plt.show()
 
     with open(dir + '/generated_position_' + datetime.datetime.now().strftime('%Y-%m-%d_%H-%M-%S') + '.csv', 'w', newline='') as f:
         writer = csv.writer(f)
