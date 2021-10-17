@@ -12,8 +12,10 @@ torch.manual_seed(10)
 lr = 0.001
 batch_size = 4
 epochs = 20000
-hidden_sizes =  [2, 4, 8, 16, 32]
+hidden_sizes =  [8]
 drop_outs = [0.25, 0.5, 0.7]
+
+latent_space_samples = torch.randn((1, 1, 100)).cuda()
 
 for hidden_size in hidden_sizes:
     for drop_out in drop_outs:
@@ -23,13 +25,11 @@ for hidden_size in hidden_sizes:
             generator = Generator(100, hidden_size, 38)
             generator.model = torch.load('./models/' + train_setting + '/' + train_setting + '_' + str(epoch) + '_model.h5')
 
-            latent_space_samples = torch.randn((1, 1, 100)).cuda()
-            # print(latent_space_samples, latent_space_samples.shape)
             generated_samples = generator(latent_space_samples).cpu()
             generated_samples = generated_samples.view(generated_samples.shape[1], generated_samples.shape[2])
             # print(generated_samples, generated_samples.shape)
 
-            frame_space = 7
+            frame_space = 5
 
             # x = generated_samples[::frame_space, 0].detach().numpy()
             # y = generated_samples[::frame_space, 1].detach().numpy()
