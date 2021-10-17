@@ -8,10 +8,10 @@ import datetime
 import os
 import csv
 
-def createdir(training_configuration):
+def createdir(training_configuration, frame_skips):
         train_setting = training_configuration
 
-        pos_dir = os.path.join(os.getcwd() + '/generated_positions/')
+        pos_dir = os.path.join(os.getcwd() + '/generated_positions_' + str(frame_skips) + '/')
         if not os.path.isdir(pos_dir):
             os.mkdir(pos_dir)
 
@@ -35,7 +35,7 @@ def func(num, dataSet, line):
 
 def track(camera_positions, frame_space, training_setting, epoch):
     # create directory for animations
-    createdir(training_setting)
+    createdir(training_setting, frame_space)
 
     # THE DATA POINTS
     # camera_positions = torch.load('./mediapipe_videos/coordinates_camera_pos/shot_7.pt').numpy()
@@ -69,7 +69,7 @@ def track(camera_positions, frame_space, training_setting, epoch):
     line_ani = animation.FuncAnimation(fig, func, frames=numDataPoints, fargs=(dataSet, line), interval=100, repeat=False)
     FFwriter = animation.FFMpegWriter(fps=5)
 
-    current_file = os.getcwd() + '/generated_positions/' + training_setting + '/' + training_setting + '_' + str(epoch)
+    current_file = os.getcwd() + '/generated_positions_' + str(frame_space) + '/' + training_setting + '/' + training_setting + '_' + str(epoch)
 
     line_ani.save(current_file + '_animation.mp4', writer=FFwriter)
     # line_ani.save(r'AnimationNew.mp4')
