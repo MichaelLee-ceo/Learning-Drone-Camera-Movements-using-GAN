@@ -8,10 +8,17 @@ import datetime
 import os
 import csv
 
-dir = os.path.join(os.getcwd() + '/generated_positions/')
-if not os.path.isdir(dir):
-    print('Creating File:generated_positions')
-    os.mkdir(dir)
+def createdir(training_configuration):
+        train_setting = training_configuration
+
+        pos_dir = os.path.join(os.getcwd() + '/generated_positions/')
+        if not os.path.isdir(pos_dir):
+            os.mkdir(pos_dir)
+
+        pos_tem_dir = os.path.join(pos_dir, train_setting)
+        if not os.path.isdir(pos_tem_dir):
+            print('Creating File:', train_setting)
+            os.mkdir(pos_tem_dir)
 
 # References
 # https://gist.github.com/neale/e32b1f16a43bfdc0608f45a504df5a84
@@ -26,7 +33,10 @@ def func(num, dataSet, line):
     return line
 
 
-def track(camera_positions, frame_space):
+def track(camera_positions, frame_space, training_setting, epoch):
+    # create directory for animations
+    createdir(training_setting)
+
     # THE DATA POINTS
     # camera_positions = torch.load('./mediapipe_videos/coordinates_camera_pos/shot_7.pt').numpy()
     # train_data = read_coordinates()
@@ -49,19 +59,25 @@ def track(camera_positions, frame_space):
 
 
     # AXES PROPERTIES]
-    # ax.set_xlim3d([limit0, limit1])
     ax.set_xlabel('X')
     ax.set_ylabel('z')
     ax.set_zlabel('y')
     ax.set_title('Trajectory of camera')
 
+
     # Creating the Animation object
-    line_ani = animation.FuncAnimation(fig, func, frames=numDataPoints, fargs=(dataSet, line), interval=100, blit=False)
+    line_ani = animation.FuncAnimation(fig, func, frames=numDataPoints, fargs=(dataSet, line), interval=100, repeat=False)
+    FFwriter = animation.FFMpegWriter(fps=5)
+
+    current_file = os.getcwd() + '/generated_positions/' + training_setting + '/' + training_setting + '_' + str(epoch)
+
+    line_ani.save(current_file + '_animation.mp4', writer=FFwriter)
     # line_ani.save(r'AnimationNew.mp4')
 
-    #plt.show()
 
-    with open(dir + '/generated_position_' + datetime.datetime.now().strftime('%Y-%m-%d_%H-%M-%S') + '.csv', 'w', newline='') as f:
+    with open(current_file + '.csv', 'w', newline='') as f:
         writer = csv.writer(f)
         writer.writerows(camera_positions.tolist()[::frame_space])
-        print('Saved generated trajectory into csv.')
+    print('Saved generated trajectory', current_file)
+
+    plt.close()

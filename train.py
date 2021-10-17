@@ -10,7 +10,7 @@ from torch.utils.tensorboard import SummaryWriter
 import time
 
 parser = argparse.ArgumentParser()
-parser.add_argument("--hidden_size", type=int, default=16, help="hidden filter channels")
+parser.add_argument("--hidden_size", type=int, default=8, help="hidden filter channels")
 parser.add_argument("--drop_out", type=float, default=0.5, help="drop out percentage")
 parser.add_argument("--learning_rate", type=float, default=0.001, help="learning_rate")
 parser.add_argument("--epochs", type=int, default=20000, help="epochs")
@@ -46,12 +46,12 @@ print(train_data.shape)
 
 # create training dataset
 train_data_length, train_data_pos, train_data_dim = train_data.shape
-print('Trained frames number', train_data_pos)
+print('### Trained frames number', train_data_pos)
 train_labels = torch.zeros(train_data_length)
 train_set = [(train_data[i], train_labels[i]) for i in range(train_data_length)]
 train_loader = torch.utils.data.DataLoader(train_set, batch_size=batch_size, shuffle=True)
 
-hidden_sizes = [2, 4, 8, 16, 32]
+hidden_sizes = [8]
 drop_outs = [0.25, 0.5, 0.7]
 
 # fixed generator noise
@@ -62,7 +62,7 @@ for hidden_size in hidden_sizes:
         start = time.time()
 
         train_setting = 'lr' + str(lr) + 'hd' + str(hidden_size) + 'bt' + str(batch_size) + 'dp' + str(drop_out) + 'ep' + str(epochs)
-        print("\n\n##########", train_setting)
+        print("\n##########", train_setting)
 
         # create temporary model file
         model_file = os.path.join(current_dir + '/models/', train_setting)

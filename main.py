@@ -29,7 +29,7 @@ for hidden_size in hidden_sizes:
             generated_samples = generated_samples.view(generated_samples.shape[1], generated_samples.shape[2])
             # print(generated_samples, generated_samples.shape)
 
-            frame_space = 5
+            frame_space = 7
 
             # x = generated_samples[::frame_space, 0].detach().numpy()
             # y = generated_samples[::frame_space, 1].detach().numpy()
