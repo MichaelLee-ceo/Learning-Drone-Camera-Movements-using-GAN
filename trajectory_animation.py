@@ -8,17 +8,19 @@ import datetime
 import os
 import csv
 
-def createdir(training_configuration, frame_skips):
-        train_setting = training_configuration
+plt.rcParams['animation.ffmpeg_path'] = 'C:/ffmpeg/bin/ffmpeg.exe'
 
-        pos_dir = os.path.join(os.getcwd() + '/generated_positions_' + str(frame_skips) + '/')
-        if not os.path.isdir(pos_dir):
-            os.mkdir(pos_dir)
+def createdir(training_configuration, frame_skips, write_file='generated_positions'):
+    train_setting = training_configuration
 
-        pos_tem_dir = os.path.join(pos_dir, train_setting)
-        if not os.path.isdir(pos_tem_dir):
-            print('Creating File:', train_setting)
-            os.mkdir(pos_tem_dir)
+    pos_dir = os.path.join(os.getcwd() + '/' + write_file + '_' + str(frame_skips) + '/')
+    if not os.path.isdir(pos_dir):
+        os.mkdir(pos_dir)
+
+    pos_tem_dir = os.path.join(pos_dir, train_setting)
+    if not os.path.isdir(pos_tem_dir):
+        print('Creating File:', train_setting)
+        os.mkdir(pos_tem_dir)
 
 # References
 # https://gist.github.com/neale/e32b1f16a43bfdc0608f45a504df5a84
@@ -33,9 +35,9 @@ def func(num, dataSet, line):
     return line
 
 
-def track(camera_positions, frame_space, training_setting, epoch):
+def track(camera_positions, frame_space, training_setting, epoch, write_file='generated_positions'):
     # create directory for animations
-    createdir(training_setting, frame_space)
+    createdir(training_setting, frame_space, write_file)
 
     # THE DATA POINTS
     # camera_positions = torch.load('./mediapipe_videos/coordinates_camera_pos/shot_7.pt').numpy()
@@ -69,9 +71,10 @@ def track(camera_positions, frame_space, training_setting, epoch):
     line_ani = animation.FuncAnimation(fig, func, frames=numDataPoints, fargs=(dataSet, line), interval=100, repeat=False)
     FFwriter = animation.FFMpegWriter(fps=5)
 
-    current_file = os.getcwd() + '/generated_positions_' + str(frame_space) + '/' + training_setting + '/' + training_setting + '_' + str(epoch)
 
-    line_ani.save(current_file + '_animation.mp4', writer=FFwriter)
+    current_file = os.getcwd() + '/' + write_file + '_' + str(frame_space) + '/' + training_setting + '/' + training_setting + '_' + str(epoch)
+
+    line_ani.save(current_file + '_animation.mp4', FFwriter)
     # line_ani.save(r'AnimationNew.mp4')
 
 

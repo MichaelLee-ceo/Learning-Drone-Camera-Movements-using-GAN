@@ -3,8 +3,7 @@ import os
 import math
 import numpy as np
 
-def read_coordinates():
-    data_path = '/mediapipe_videos/coordinates_camera_pos/'
+def read_coordinates(data_path = '/mediapipe_videos/coordinates_camera_pos/'):
     fullpath = os.path.join(os.getcwd() + data_path)
 
     data = []
@@ -12,6 +11,7 @@ def read_coordinates():
     for root, dirs, files in os.walk(fullpath):
         for idx, f in enumerate(files):
             if f.endswith('.pt'):
+                print('read coordinates file:', f)
                 data.append(torch.load(fullpath + f))
                 data_length.append(data[-1].shape[0])
 
